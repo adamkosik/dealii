@@ -2037,6 +2037,36 @@ TriaAccessor<structdim, dim, spacedim>::diameter () const
 
 template <int structdim, int dim, int spacedim>
 double
+TriaAccessor<structdim, dim, spacedim>::max_in_axis (const unsigned int axis) const
+{
+  Assert (axis < structdim, ExcIndexRange (axis, 0, structdim));
+  double maximum = -std::numeric_limits<double>::infinity ();
+
+  for (unsigned int v=0; v<GeometryInfo<structdim>::vertices_per_cell; ++v)
+      maximum = std::max(maximum, vertex(v)[axis]);
+
+  return maximum;
+}
+
+
+
+template <int structdim, int dim, int spacedim>
+double
+TriaAccessor<structdim, dim, spacedim>::min_in_axis (const unsigned int axis) const
+{
+  Assert (axis < structdim, ExcIndexRange (axis, 0, structdim));
+  double minimum = std::numeric_limits<double>::infinity ();
+
+  for (unsigned int v=0; v<GeometryInfo<structdim>::vertices_per_cell; ++v)
+      minimum = std::min(minimum, vertex(v)[axis]);
+
+  return minimum;
+}
+
+
+
+template <int structdim, int dim, int spacedim>
+double
 TriaAccessor<structdim, dim, spacedim>::minimum_vertex_distance () const
 {
   switch (structdim)

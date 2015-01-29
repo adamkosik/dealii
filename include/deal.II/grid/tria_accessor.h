@@ -1515,6 +1515,20 @@ public:
   double diameter () const;
 
   /**
+   * Max value in given axis.
+   *
+   * This is the maximum of all vertices in given axis.
+   */
+  double max_in_axis (const unsigned int axis) const;
+
+  /**
+   * Min value in given axis.
+   *
+   * This is the minimum of all vertices in given axis.
+   */
+  double min_in_axis (const unsigned int axis) const;
+
+  /**
    * Length of an object in the direction
    * of the given axis, specified in the
    * local coordinate system. See the
