@@ -2043,7 +2043,7 @@ TriaAccessor<structdim, dim, spacedim>::max_in_axis (const unsigned int axis) co
   double maximum = -std::numeric_limits<double>::infinity ();
 
   for (unsigned int v=0; v<GeometryInfo<structdim>::vertices_per_cell; ++v)
-      maximum = std::max(maximum, vertex(v)[axis]);
+      maximum = std::max(maximum, this->vertex(v)[axis]);
 
   return maximum;
 }
@@ -2058,7 +2058,7 @@ TriaAccessor<structdim, dim, spacedim>::min_in_axis (const unsigned int axis) co
   double minimum = std::numeric_limits<double>::infinity ();
 
   for (unsigned int v=0; v<GeometryInfo<structdim>::vertices_per_cell; ++v)
-      minimum = std::min(minimum, vertex(v)[axis]);
+      minimum = std::min(minimum, this->vertex(v)[axis]);
 
   return minimum;
 }
