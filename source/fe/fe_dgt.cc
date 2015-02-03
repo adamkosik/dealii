@@ -1,5 +1,4 @@
 // ---------------------------------------------------------------------
-// $Id: fe_dgp_nonparametric.cc 30037 2013-07-18 16:55:40Z maier $
 //
 // Copyright (C) 2002 - 2013 by the deal.II authors
 //
@@ -131,8 +130,42 @@ DEAL_II_NAMESPACE_OPEN
         const unsigned int i, const Point<dim> &p) const
     {
       Assert(i<this->dofs_per_cell, ExcIndexRange(i, 0, this->dofs_per_cell));
-      const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
-      return polynomial_space.compute_value (i, pp);
+      if ((dim == 2) and (i < 6))
+        {
+          const double x_diameter = (cell->max_in_axis (0)
+              - cell->min_in_axis (0)) / 2.0;
+          const double y_diameter = (cell->max_in_axis (1)
+              - cell->min_in_axis (1)) / 2.0;
+          Point<dim> pp = (p - cell->center ());
+          pp (0) /= x_diameter;
+          pp (1) /= y_diameter;
+          switch (i)
+            {
+            case 0:
+              return 1.0;
+              break;
+            case 1:
+              return pp (0);
+              break;
+            case 2:
+              return pp (1);
+              break;
+            case 3:
+              return pp (0) * pp (0) / 2.0 - 1.0 / 6.0;
+              break;
+            case 4:
+              return pp (0) * pp (1);
+              break;
+            case 5:
+              return pp (1) * pp (1) / 2.0 - 1.0 / 6.0;
+              break;
+            }
+        }
+      else
+        {
+          const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
+          return polynomial_space.compute_value (i, pp);
+        }
     }
 
   template<int dim, int spacedim>
@@ -147,11 +180,34 @@ DEAL_II_NAMESPACE_OPEN
       Assert(values[0].size()==p.size(),
              ExcDimensionMismatch(values[0].size(), p.size()));
 
-      for (unsigned int q = 0; q < p.size (); ++q)
+      if (dim == 2)
         {
-          const Point<dim> pp = (p[q] - cell->center ()) / cell->diameter ();
-          for (unsigned int i = 0; i < this->dofs_per_cell; ++i)
-            values[i][q] = polynomial_space.compute_value (i, pp);
+          const double x_diameter = (cell->max_in_axis (0)
+              - cell->min_in_axis (0)) / 2.0;
+          const double y_diameter = (cell->max_in_axis (1)
+              - cell->min_in_axis (1)) / 2.0;
+          for (unsigned int q = 0; q < p.size (); ++q)
+            {
+              Point<dim> pp = (p[q] - cell->center ());
+              pp (0) /= x_diameter;
+              pp (1) /= y_diameter;
+              values[0][q] = 1.0;
+              values[1][q] = pp (0);
+              values[2][q] = pp (1);
+              values[3][q] = pp (0) * pp (0) / 2.0 - 1.0 / 6.0;
+              values[4][q] = pp (0) * pp (1);
+              values[5][q] = pp (1) * pp (1) / 2.0 - 1.0 / 6.0;
+            }
+        }
+      else
+        {
+          for (unsigned int q = 0; q < p.size (); ++q)
+            {
+              const Point<dim> pp = (p[q] - cell->center ())
+                  / cell->diameter ();
+              for (unsigned int i = 0; i < this->dofs_per_cell; ++i)
+                values[i][q] = polynomial_space.compute_value (i, pp);
+            }
         }
     }
 
@@ -174,8 +230,42 @@ DEAL_II_NAMESPACE_OPEN
     {
       Assert(i<this->dofs_per_cell, ExcIndexRange(i, 0, this->dofs_per_cell));
       Assert(component == 0, ExcIndexRange (component, 0, 1));
-      const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
-      return polynomial_space.compute_value (i, pp);
+      if ((dim == 2) and (i < 6))
+        {
+          const double x_diameter = (cell->max_in_axis (0)
+              - cell->min_in_axis (0)) / 2.0;
+          const double y_diameter = (cell->max_in_axis (1)
+              - cell->min_in_axis (1)) / 2.0;
+          Point<dim> pp = (p - cell->center ());
+          pp (0) /= x_diameter;
+          pp (1) /= y_diameter;
+          switch (i)
+            {
+            case 0:
+              return 1.0;
+              break;
+            case 1:
+              return pp (0);
+              break;
+            case 2:
+              return pp (1);
+              break;
+            case 3:
+              return pp (0) * pp (0) / 2.0 - 1.0 / 6.0;
+              break;
+            case 4:
+              return pp (0) * pp (1);
+              break;
+            case 5:
+              return pp (1) * pp (1) / 2.0 - 1.0 / 6.0;
+              break;
+            }
+        }
+      else
+        {
+          const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
+          return polynomial_space.compute_value (i, pp);
+        }
     }
 
   template<int dim, int spacedim>
@@ -194,8 +284,42 @@ DEAL_II_NAMESPACE_OPEN
         const unsigned int i, const Point<dim> &p) const
     {
       Assert(i<this->dofs_per_cell, ExcIndexRange(i, 0, this->dofs_per_cell));
-      const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
-      return polynomial_space.compute_grad (i, pp) / cell->diameter ();
+      const double x_diameter = (cell->max_in_axis (0) - cell->min_in_axis (0))
+          / 2.0;
+      const double y_diameter = (cell->max_in_axis (1) - cell->min_in_axis (1))
+          / 2.0;
+
+      if ((dim == 2) and (i < 6))
+        {
+          switch (i)
+            {
+            case 0:
+              return polynomial_space.compute_grad (0, p);
+              break;
+            case 1:
+              return polynomial_space.compute_grad (1, p) / x_diameter;
+              break;
+            case 2:
+              return polynomial_space.compute_grad (2, p) / y_diameter;
+              break;
+            case 3:
+              return polynomial_space.compute_grad (3, p) / x_diameter
+                  / x_diameter;
+              break;
+            case 4:
+              return polynomial_space.compute_grad (4, p) / x_diameter
+                  / y_diameter;
+              break;
+            case 5:
+              return polynomial_space.compute_grad (5, p) / y_diameter
+                  / y_diameter;
+              break;
+            }
+        }
+      else
+        {
+          return polynomial_space.compute_grad (i, p);
+        }
     }
 
   template<int dim, int spacedim>
@@ -217,8 +341,42 @@ DEAL_II_NAMESPACE_OPEN
     {
       Assert(i<this->dofs_per_cell, ExcIndexRange(i, 0, this->dofs_per_cell));
       Assert(component == 0, ExcIndexRange (component, 0, 1));
-      const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
-      return polynomial_space.compute_grad (i, pp) / cell->diameter ();
+      const double x_diameter = (cell->max_in_axis (0) - cell->min_in_axis (0))
+          / 2.0;
+      const double y_diameter = (cell->max_in_axis (1) - cell->min_in_axis (1))
+          / 2.0;
+
+      if ((dim == 2) and (i < 6))
+        {
+          switch (i)
+            {
+            case 0:
+              return polynomial_space.compute_grad (0, p);
+              break;
+            case 1:
+              return polynomial_space.compute_grad (1, p) / x_diameter;
+              break;
+            case 2:
+              return polynomial_space.compute_grad (2, p) / y_diameter;
+              break;
+            case 3:
+              return polynomial_space.compute_grad (3, p) / x_diameter
+                  / x_diameter;
+              break;
+            case 4:
+              return polynomial_space.compute_grad (4, p) / x_diameter
+                  / y_diameter;
+              break;
+            case 5:
+              return polynomial_space.compute_grad (5, p) / y_diameter
+                  / y_diameter;
+              break;
+            }
+        }
+      else
+        {
+          return polynomial_space.compute_grad (i, p);
+        }
     }
 
   template<int dim, int spacedim>
@@ -237,9 +395,42 @@ DEAL_II_NAMESPACE_OPEN
         const unsigned int i, const Point<dim> &p) const
     {
       Assert(i<this->dofs_per_cell, ExcIndexRange(i, 0, this->dofs_per_cell));
-      const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
-      return polynomial_space.compute_grad_grad (i, pp) / cell->diameter ()
-          / cell->diameter ();
+      const double x_diameter = (cell->max_in_axis (0) - cell->min_in_axis (0))
+          / 2.0;
+      const double y_diameter = (cell->max_in_axis (1) - cell->min_in_axis (1))
+          / 2.0;
+
+      if ((dim == 2) and (i < 6))
+        {
+          switch (i)
+            {
+            case 0:
+              return polynomial_space.compute_grad_grad (0, p);
+              break;
+            case 1:
+              return polynomial_space.compute_grad_grad (1, p) / x_diameter;
+              break;
+            case 2:
+              return polynomial_space.compute_grad_grad (2, p) / y_diameter;
+              break;
+            case 3:
+              return polynomial_space.compute_grad_grad (3, p) / x_diameter
+                  / x_diameter;
+              break;
+            case 4:
+              return polynomial_space.compute_grad_grad (4, p) / x_diameter
+                  / y_diameter;
+              break;
+            case 5:
+              return polynomial_space.compute_grad_grad (5, p) / y_diameter
+                  / y_diameter;
+              break;
+            }
+        }
+      else
+        {
+          return polynomial_space.compute_grad_grad (i, p);
+        }
     }
 
   template<int dim, int spacedim>
@@ -261,9 +452,42 @@ DEAL_II_NAMESPACE_OPEN
     {
       Assert(i<this->dofs_per_cell, ExcIndexRange(i, 0, this->dofs_per_cell));
       Assert(component == 0, ExcIndexRange (component, 0, 1));
-      const Point<dim> pp = (p - cell->center ()) / cell->diameter ();
-      return polynomial_space.compute_grad_grad (i, pp) / cell->diameter ()
-          / cell->diameter ();
+      const double x_diameter = (cell->max_in_axis (0) - cell->min_in_axis (0))
+          / 2.0;
+      const double y_diameter = (cell->max_in_axis (1) - cell->min_in_axis (1))
+          / 2.0;
+
+      if ((dim == 2) and (i < 6))
+        {
+          switch (i)
+            {
+            case 0:
+              return polynomial_space.compute_grad_grad (0, p);
+              break;
+            case 1:
+              return polynomial_space.compute_grad_grad (1, p) / x_diameter;
+              break;
+            case 2:
+              return polynomial_space.compute_grad_grad (2, p) / y_diameter;
+              break;
+            case 3:
+              return polynomial_space.compute_grad_grad (3, p) / x_diameter
+                  / x_diameter;
+              break;
+            case 4:
+              return polynomial_space.compute_grad_grad (4, p) / x_diameter
+                  / y_diameter;
+              break;
+            case 5:
+              return polynomial_space.compute_grad_grad (5, p) / y_diameter
+                  / y_diameter;
+              break;
+            }
+        }
+      else
+        {
+          return polynomial_space.compute_grad_grad (i, p);
+        }
     }
 
 //---------------------------------------------------------------------------
@@ -381,18 +605,107 @@ DEAL_II_NAMESPACE_OPEN
       if (flags & (update_values | update_gradients))
         for (unsigned int i = 0; i < n_q_points; ++i)
           {
-            const Point<dim> p = (data.quadrature_points[i] - cell->center ())
-                / h;
-            polynomial_space.compute (p, //data.quadrature_points[i],
-                fe_data.values, fe_data.grads, fe_data.grad_grads);
-            for (unsigned int k = 0; k < this->dofs_per_cell; ++k)
+            if (dim == 2)
               {
+                const double x_diameter = (cell->max_in_axis (0)
+                    - cell->min_in_axis (0)) / 2.0;
+                const double y_diameter = (cell->max_in_axis (1)
+                    - cell->min_in_axis (1)) / 2.0;
+                Point<dim> p = (data.quadrature_points[i] - cell->center ());
+                p (0) /= x_diameter;
+                p (1) /= y_diameter;
                 if (flags & update_values)
-                  data.shape_values[k][i] = fe_data.values[k];
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_values[0][i] = 1.0;
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_values[1][i] = p (0);
+                        data.shape_values[2][i] = p (1);
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_values[3][i] = p (0) * p (0) / 2.0
+                            - 1.0 / 6.0;
+                        data.shape_values[4][i] = p (0) * p (1);
+                        data.shape_values[5][i] = p (1) * p (1) / 2.0
+                            - 1.0 / 6.0;
+                      }
+                  }
                 if (flags & update_gradients)
-                  data.shape_gradients[k][i] = fe_data.grads[k] / h;
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_gradients[0][i] =
+                            polynomial_space.compute_grad (0, p);
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_gradients[1][i] =
+                            polynomial_space.compute_grad (1, p) / x_diameter;
+                        data.shape_gradients[2][i] =
+                            polynomial_space.compute_grad (2, p) / y_diameter;
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_gradients[3][i] =
+                            polynomial_space.compute_grad (3, p) / x_diameter
+                                / x_diameter;
+                        data.shape_gradients[4][i] =
+                            polynomial_space.compute_grad (4, p) / x_diameter
+                                / y_diameter;
+                        data.shape_gradients[5][i] =
+                            polynomial_space.compute_grad (5, p) / y_diameter
+                                / y_diameter;
+                      }
+                  }
                 if (flags & update_hessians)
-                  data.shape_hessians[k][i] = fe_data.grad_grads[k] / h / h;
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_hessians[0][i] =
+                            polynomial_space.compute_grad_grad (0, p);
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_hessians[1][i] =
+                            polynomial_space.compute_grad_grad (1, p)
+                                / x_diameter;
+                        data.shape_hessians[2][i] =
+                            polynomial_space.compute_grad_grad (2, p)
+                                / y_diameter;
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_hessians[3][i] =
+                            polynomial_space.compute_grad_grad (3, p)
+                                / x_diameter / x_diameter;
+                        data.shape_hessians[4][i] =
+                            polynomial_space.compute_grad_grad (4, p)
+                                / x_diameter / y_diameter;
+                        data.shape_hessians[5][i] =
+                            polynomial_space.compute_grad_grad (5, p)
+                                / y_diameter / y_diameter;
+                      }
+                  }
+              }
+            else
+              {
+                const Point<dim> p = (data.quadrature_points[i]
+                    - cell->center ()) / h;
+                polynomial_space.compute (p, //data.quadrature_points[i],
+                    fe_data.values, fe_data.grads, fe_data.grad_grads);
+                for (unsigned int k = 0; k < this->dofs_per_cell; ++k)
+                  {
+                    if (flags & update_values)
+                      data.shape_values[k][i] = fe_data.values[k];
+                    if (flags & update_gradients)
+                      data.shape_gradients[k][i] = fe_data.grads[k] / h;
+                    if (flags & update_hessians)
+                      data.shape_hessians[k][i] = fe_data.grad_grads[k] / h / h;
+                  }
               }
           }
     }
@@ -423,18 +736,107 @@ DEAL_II_NAMESPACE_OPEN
       if (flags & (update_values | update_gradients))
         for (unsigned int i = 0; i < n_q_points; ++i)
           {
-            const Point<dim> p = (data.quadrature_points[i] - cell->center ())
-                / h;
-            polynomial_space.compute (p, //data.quadrature_points[i],
-                fe_data.values, fe_data.grads, fe_data.grad_grads);
-            for (unsigned int k = 0; k < this->dofs_per_cell; ++k)
+            if (dim == 2)
               {
+                const double x_diameter = (cell->max_in_axis (0)
+                    - cell->min_in_axis (0)) / 2.0;
+                const double y_diameter = (cell->max_in_axis (1)
+                    - cell->min_in_axis (1)) / 2.0;
+                Point<dim> p = (data.quadrature_points[i] - cell->center ());
+                p (0) /= x_diameter;
+                p (1) /= y_diameter;
                 if (flags & update_values)
-                  data.shape_values[k][i] = fe_data.values[k];
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_values[0][i] = 1.0;
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_values[1][i] = p (0);
+                        data.shape_values[2][i] = p (1);
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_values[3][i] = p (0) * p (0) / 2.0
+                            - 1.0 / 6.0;
+                        data.shape_values[4][i] = p (0) * p (1);
+                        data.shape_values[5][i] = p (1) * p (1) / 2.0
+                            - 1.0 / 6.0;
+                      }
+                  }
                 if (flags & update_gradients)
-                  data.shape_gradients[k][i] = fe_data.grads[k] / h;
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_gradients[0][i] =
+                            polynomial_space.compute_grad (0, p);
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_gradients[1][i] =
+                            polynomial_space.compute_grad (1, p) / x_diameter;
+                        data.shape_gradients[2][i] =
+                            polynomial_space.compute_grad (2, p) / y_diameter;
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_gradients[3][i] =
+                            polynomial_space.compute_grad (3, p) / x_diameter
+                                / x_diameter;
+                        data.shape_gradients[4][i] =
+                            polynomial_space.compute_grad (4, p) / x_diameter
+                                / y_diameter;
+                        data.shape_gradients[5][i] =
+                            polynomial_space.compute_grad (5, p) / y_diameter
+                                / y_diameter;
+                      }
+                  }
                 if (flags & update_hessians)
-                  data.shape_hessians[k][i] = fe_data.grad_grads[k] / h / h;
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_hessians[0][i] =
+                            polynomial_space.compute_grad_grad (0, p);
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_hessians[1][i] =
+                            polynomial_space.compute_grad_grad (1, p)
+                                / x_diameter;
+                        data.shape_hessians[2][i] =
+                            polynomial_space.compute_grad_grad (2, p)
+                                / y_diameter;
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_hessians[3][i] =
+                            polynomial_space.compute_grad_grad (3, p)
+                                / x_diameter / x_diameter;
+                        data.shape_hessians[4][i] =
+                            polynomial_space.compute_grad_grad (4, p)
+                                / x_diameter / y_diameter;
+                        data.shape_hessians[5][i] =
+                            polynomial_space.compute_grad_grad (5, p)
+                                / y_diameter / y_diameter;
+                      }
+                  }
+              }
+            else
+              {
+                const Point<dim> p = (data.quadrature_points[i]
+                    - cell->center ()) / h;
+                polynomial_space.compute (p, //data.quadrature_points[i],
+                    fe_data.values, fe_data.grads, fe_data.grad_grads);
+                for (unsigned int k = 0; k < this->dofs_per_cell; ++k)
+                  {
+                    if (flags & update_values)
+                      data.shape_values[k][i] = fe_data.values[k];
+                    if (flags & update_gradients)
+                      data.shape_gradients[k][i] = fe_data.grads[k] / h;
+                    if (flags & update_hessians)
+                      data.shape_hessians[k][i] = fe_data.grad_grads[k] / h / h;
+                  }
               }
           }
     }
@@ -465,18 +867,107 @@ DEAL_II_NAMESPACE_OPEN
       if (flags & (update_values | update_gradients))
         for (unsigned int i = 0; i < n_q_points; ++i)
           {
-            const Point<dim> p = (data.quadrature_points[i] - cell->center ())
-                / h;
-            polynomial_space.compute (p, //data.quadrature_points[i],
-                fe_data.values, fe_data.grads, fe_data.grad_grads);
-            for (unsigned int k = 0; k < this->dofs_per_cell; ++k)
+            if (dim == 2)
               {
+                const double x_diameter = (cell->max_in_axis (0)
+                    - cell->min_in_axis (0)) / 2.0;
+                const double y_diameter = (cell->max_in_axis (1)
+                    - cell->min_in_axis (1)) / 2.0;
+                Point<dim> p = (data.quadrature_points[i] - cell->center ());
+                p (0) /= x_diameter;
+                p (1) /= y_diameter;
                 if (flags & update_values)
-                  data.shape_values[k][i] = fe_data.values[k];
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_values[0][i] = 1.0;
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_values[1][i] = p (0);
+                        data.shape_values[2][i] = p (1);
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_values[3][i] = p (0) * p (0) / 2.0
+                            - 1.0 / 6.0;
+                        data.shape_values[4][i] = p (0) * p (1);
+                        data.shape_values[5][i] = p (1) * p (1) / 2.0
+                            - 1.0 / 6.0;
+                      }
+                  }
                 if (flags & update_gradients)
-                  data.shape_gradients[k][i] = fe_data.grads[k] / h;
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_gradients[0][i] =
+                            polynomial_space.compute_grad (0, p);
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_gradients[1][i] =
+                            polynomial_space.compute_grad (1, p) / x_diameter;
+                        data.shape_gradients[2][i] =
+                            polynomial_space.compute_grad (2, p) / y_diameter;
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_gradients[3][i] =
+                            polynomial_space.compute_grad (3, p) / x_diameter
+                                / x_diameter;
+                        data.shape_gradients[4][i] =
+                            polynomial_space.compute_grad (4, p) / x_diameter
+                                / y_diameter;
+                        data.shape_gradients[5][i] =
+                            polynomial_space.compute_grad (5, p) / y_diameter
+                                / y_diameter;
+                      }
+                  }
                 if (flags & update_hessians)
-                  data.shape_hessians[k][i] = fe_data.grad_grads[k] / h / h;
+                  {
+                    if (this->dofs_per_cell > 0)
+                      {
+                        data.shape_hessians[0][i] =
+                            polynomial_space.compute_grad_grad (0, p);
+                      }
+                    if (this->dofs_per_cell > 1)
+                      {
+                        data.shape_hessians[1][i] =
+                            polynomial_space.compute_grad_grad (1, p)
+                                / x_diameter;
+                        data.shape_hessians[2][i] =
+                            polynomial_space.compute_grad_grad (2, p)
+                                / y_diameter;
+                      }
+                    if (this->dofs_per_cell > 3)
+                      {
+                        data.shape_hessians[3][i] =
+                            polynomial_space.compute_grad_grad (3, p)
+                                / x_diameter / x_diameter;
+                        data.shape_hessians[4][i] =
+                            polynomial_space.compute_grad_grad (4, p)
+                                / x_diameter / y_diameter;
+                        data.shape_hessians[5][i] =
+                            polynomial_space.compute_grad_grad (5, p)
+                                / y_diameter / y_diameter;
+                      }
+                  }
+              }
+            else
+              {
+                const Point<dim> p = (data.quadrature_points[i]
+                    - cell->center ()) / h;
+                polynomial_space.compute (p, //data.quadrature_points[i],
+                    fe_data.values, fe_data.grads, fe_data.grad_grads);
+                for (unsigned int k = 0; k < this->dofs_per_cell; ++k)
+                  {
+                    if (flags & update_values)
+                      data.shape_values[k][i] = fe_data.values[k];
+                    if (flags & update_gradients)
+                      data.shape_gradients[k][i] = fe_data.grads[k] / h;
+                    if (flags & update_hessians)
+                      data.shape_hessians[k][i] = fe_data.grad_grads[k] / h / h;
+                  }
               }
           }
     }
