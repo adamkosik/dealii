@@ -629,6 +629,7 @@ DEAL_II_NAMESPACE_OPEN
                       }
                     if (this->dofs_per_cell > 3)
                       {
+
                         data.shape_values[3][i] = p (0) * p (0) / 2.0
                             - 1.0 / 6.0;
                         data.shape_values[4][i] = p (0) * p (1);
@@ -653,14 +654,14 @@ DEAL_II_NAMESPACE_OPEN
                       }
                     if (this->dofs_per_cell > 3)
                       {
-                        data.shape_gradients[3][i][0] = p(0) / x_diameter;
+                        data.shape_gradients[3][i][0] = p (0) / x_diameter;
                         data.shape_gradients[3][i][1] = 0.0;
 
-                        data.shape_gradients[4][i][0] = p(1) / x_diameter;
-                        data.shape_gradients[4][i][1] = p(0) / y_diameter;
+                        data.shape_gradients[4][i][0] = p (1) / x_diameter;
+                        data.shape_gradients[4][i][1] = p (0) / y_diameter;
 
                         data.shape_gradients[5][i][0] = 0.0;
-                        data.shape_gradients[5][i][1] = p(1) / y_diameter;
+                        data.shape_gradients[5][i][1] = p (1) / y_diameter;
                       }
                   }
                 if (flags & update_hessians)
@@ -786,14 +787,14 @@ DEAL_II_NAMESPACE_OPEN
                       }
                     if (this->dofs_per_cell > 3)
                       {
-                        data.shape_gradients[3][i][0] = p(0) / x_diameter;
+                        data.shape_gradients[3][i][0] = p (0) / x_diameter;
                         data.shape_gradients[3][i][1] = 0.0;
 
-                        data.shape_gradients[4][i][0] = p(1) / x_diameter;
-                        data.shape_gradients[4][i][1] = p(0) / y_diameter;
+                        data.shape_gradients[4][i][0] = p (1) / x_diameter;
+                        data.shape_gradients[4][i][1] = p (0) / y_diameter;
 
                         data.shape_gradients[5][i][0] = 0.0;
-                        data.shape_gradients[5][i][1] = p(1) / y_diameter;
+                        data.shape_gradients[5][i][1] = p (1) / y_diameter;
                       }
                   }
                 if (flags & update_hessians)
@@ -919,14 +920,14 @@ DEAL_II_NAMESPACE_OPEN
                       }
                     if (this->dofs_per_cell > 3)
                       {
-                        data.shape_gradients[3][i][0] = p(0) / x_diameter;
+                        data.shape_gradients[3][i][0] = p (0) / x_diameter;
                         data.shape_gradients[3][i][1] = 0.0;
 
-                        data.shape_gradients[4][i][0] = p(1) / x_diameter;
-                        data.shape_gradients[4][i][1] = p(0) / y_diameter;
+                        data.shape_gradients[4][i][0] = p (1) / x_diameter;
+                        data.shape_gradients[4][i][1] = p (0) / y_diameter;
 
                         data.shape_gradients[5][i][0] = 0.0;
-                        data.shape_gradients[5][i][1] = p(1) / y_diameter;
+                        data.shape_gradients[5][i][1] = p (1) / y_diameter;
                       }
                   }
                 if (flags & update_hessians)
