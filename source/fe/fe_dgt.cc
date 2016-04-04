@@ -513,6 +513,13 @@ DEAL_II_NAMESPACE_OPEN
       return dpo;
     }
 
+  template <int dim, int spacedim>
+    UpdateFlags
+    FE_DGT<dim,spacedim>::requires_update_flags (const UpdateFlags flags) const
+    {
+      return update_once(flags) | update_each(flags);
+    }
+
   template<int dim, int spacedim>
     UpdateFlags
     FE_DGT<dim, spacedim>::update_once (const UpdateFlags) const
