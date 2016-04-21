@@ -600,7 +600,6 @@ DEAL_II_NAMESPACE_OPEN
           / 2.0;
       const double y_diameter = (cell->max_in_axis (1) - cell->min_in_axis (1))
           / 2.0;
-
       if (fe_data.update_each & (update_values | update_gradients))
         for (unsigned int i = 0; i < n_q_points; ++i)
           {
@@ -657,10 +656,8 @@ DEAL_II_NAMESPACE_OPEN
                             / x_diameter;
                         output_data.shape_gradients[3][i][1] = 0.0;
 
-                        output_data.shape_gradients[4][i][0] = p (1)
-                            / x_diameter;
-                        output_data.shape_gradients[4][i][1] = p (0)
-                            / y_diameter;
+                      output_data.shape_gradients[4][i][0] = p (1) / x_diameter;
+                      output_data.shape_gradients[4][i][1] = p (0) / y_diameter;
 
                         output_data.shape_gradients[5][i][0] = 0.0;
                         output_data.shape_gradients[5][i][1] = p (1)
@@ -671,29 +668,31 @@ DEAL_II_NAMESPACE_OPEN
                   {
                     if (this->dofs_per_cell > 0)
                       {
-                        output_data.shape_hessians[0][i] =
-                            polynomial_space.compute_grad_grad (0, p);
+                        output_data.shape_hessians[0][i] = 0.0;
                       }
                     if (this->dofs_per_cell > 1)
                       {
-                        output_data.shape_hessians[1][i] =
-                            polynomial_space.compute_grad_grad (1, p)
-                                / x_diameter;
-                        output_data.shape_hessians[2][i] =
-                            polynomial_space.compute_grad_grad (2, p)
-                                / y_diameter;
+                        output_data.shape_hessians[1][i] = 0.0;
+                        output_data.shape_hessians[2][i] = 0.0;
                       }
                     if (this->dofs_per_cell > 3)
                       {
-                        output_data.shape_hessians[3][i] =
-                            polynomial_space.compute_grad_grad (3, p)
-                                / x_diameter / x_diameter;
-                        output_data.shape_hessians[4][i] =
-                            polynomial_space.compute_grad_grad (4, p)
-                                / x_diameter / y_diameter;
-                        output_data.shape_hessians[5][i] =
-                            polynomial_space.compute_grad_grad (5, p)
-                                / y_diameter / y_diameter;
+                        output_data.shape_hessians[3][i][0][0] = 1.0 / x_diameter
+                            / x_diameter;
+                        output_data.shape_hessians[3][i][1][0] = 0.0;
+                        output_data.shape_hessians[3][i][0][1] = 0.0;
+                        output_data.shape_hessians[3][i][1][1] = 0.0;
+                        output_data.shape_hessians[4][i][0][0] = 0.0;
+                        output_data.shape_hessians[4][i][1][0] = 1.0 / x_diameter
+                            / y_diameter;
+                        output_data.shape_hessians[4][i][0][1] = 1.0 / x_diameter
+                            / y_diameter;
+                        output_data.shape_hessians[4][i][1][1] = 0.0;
+                        output_data.shape_hessians[5][i][0][0] = 0.0;
+                        output_data.shape_hessians[5][i][1][0] = 0.0;
+                        output_data.shape_hessians[5][i][0][1] = 0.0;
+                        output_data.shape_hessians[5][i][1][1] = 1.0 / y_diameter
+                            / y_diameter;
                       }
                   }
               }
